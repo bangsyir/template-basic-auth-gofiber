@@ -53,6 +53,6 @@ func (r *UserRepository) DeleteRefreshToken(ctx context.Context, token string) e
 	return r.db.WithContext(ctx).Where("token = ?", token).Delete(&user.RefreshToken{}).Error
 }
 
-func (r *UserRepository) DeleteAllRefreshTokensForUser(ctx context.Context, userID uint) error {
+func (r *UserRepository) DeleteRefreshTokensForUser(ctx context.Context, userID uint) error {
 	return r.db.WithContext(ctx).Where("user_id = ?", userID).Delete(&user.RefreshToken{}).Error
 }
