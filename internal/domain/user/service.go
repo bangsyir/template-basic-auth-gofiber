@@ -48,8 +48,11 @@ func (s *Service) Login(ctx context.Context, username, password string) (*User, 
 	}
 	currectRefreshToken, err := s.repo.FindRefreshTokenByUserId(ctx, user.ID)
 	isExpired := s.checkIfAccessTokenIsExpired(currectRefreshToken.ExpiresAt)
-	if !isExpired {
+	if isExpired == false {
 		return user, accessToken, currectRefreshToken.Token, nil
+	}
+	if err := s.repo.DeleteRefreshTokensForUser(ctx, user.ID); err != nil {
+		return nil, "", "", err
 	}
 
 	refreshToken, _, err := s.generateRefreshToken(ctx, user.ID)
@@ -60,12 +63,9 @@ func (s *Service) Login(ctx context.Context, username, password string) (*User, 
 }
 
 func (s *Service) checkIfAccessTokenIsExpired(expiresAt time.Time) bool {
-	currentTime := time.Now()
-	if currentTime.After(expiresAt) {
-		return true
-	} else {
-		return false
-	}
+	// make current time minus 15 minues
+	threshhold := time.Now()
+	return expiresAt.Before(threshhold) || expiresAt.Equal(threshhold)
 }
 
 func (s *Service) generateAccessToken(userID uint) (string, error) {
