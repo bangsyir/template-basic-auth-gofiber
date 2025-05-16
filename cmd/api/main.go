@@ -26,9 +26,10 @@ func main() {
 	userHandler := http.NewUserHandler(userService)
 
 	// create fiber app
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		DisableStartupMessage: true,
+	})
 	app.Use(logger.New())
-
 	//routes
 	api := app.Group("/api/v1")
 	api.Post("/register", userHandler.Register)
