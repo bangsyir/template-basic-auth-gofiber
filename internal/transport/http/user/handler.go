@@ -63,6 +63,47 @@ func (h *Handler) Login(c *fiber.Ctx) error {
 	return c.JSON(user)
 }
 
+func (h *Handler) ProtectedRoute(c *fiber.Ctx) error {
+	// safty get user ID from context
+	userID, ok := c.Locals("userID").(uint)
+	if !ok {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Invalid user context",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "welcome to protected route",
+		"user_id": userID,
+		"data":    "Sensitive information here",
+	})
+}
+
+func (h *Handler) GetUser(c *fiber.Ctx) error {
+	userID, ok := c.Locals("userID").(uint)
+	if !ok {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Invalid user context",
+		})
+	}
+	data, err := h.service.FindUserByID(c.Context(), userID)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "user not found",
+		})
+	}
+
+	// response := user.UserResponse{
+	// 	ID:        data.ID,
+	// 	Username:  data.Username,
+	// 	Email:     data.Email,
+	// 	CreatedAt: data.CreatedAt,
+	// }
+	return c.JSON(fiber.Map{
+		"user": &data,
+	})
+}
+
 // func (h *Handler) RefreshToken(c *fiber.Ctx) error {
 //   var req struct {
 //     AccessToken string `json:"access_token"`
