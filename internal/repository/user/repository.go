@@ -4,9 +4,17 @@ import (
 	"context"
 	"errors"
 	"go-auth/internal/domain/user"
+	"time"
 
 	"gorm.io/gorm"
 )
+
+type UserResponse struct {
+	ID        uint      `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
+}
 
 type UserRepository struct {
 	db *gorm.DB
@@ -29,6 +37,17 @@ func (r *UserRepository) FindByUserName(ctx context.Context, username string) (*
 	}
 
 	return &u, err
+}
+
+func (r *UserRepository) FindUserById(ctx context.Context, userID uint) (*user.UserResponse, error) {
+	var result user.UserResponse
+	err := r.db.WithContext(ctx).Model(&user.User{}).Select("id", "username", "email", "created_at").Where("id = ?", userID).Scan(&result).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errors.New("user not found")
+	}
+
+	return &result, err
 }
 
 func (r *UserRepository) CreateRefreshToken(ctx context.Context, token *user.RefreshToken) error {
