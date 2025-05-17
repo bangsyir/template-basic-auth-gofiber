@@ -6,7 +6,14 @@ type User struct {
 	ID        uint      `json:"id"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
-	Password  string    `json:"password"`
+	Password  string    `json:"-"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type UserResponse struct {
+	ID        uint      `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
